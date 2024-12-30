@@ -8,6 +8,7 @@ const createUser = catchAsync(async (req, res) => {
   const { password, ...userData } = req.body;
   const result = await AuthServices.createUserIntoDB(password, userData);
 
+  // destructuring result
   const { _id, name, email } = result;
 
   sendResponse(res, {
@@ -23,9 +24,11 @@ const createUser = catchAsync(async (req, res) => {
 });
 
 const loginUser = catchAsync(async (req, res) => {
-  console.log(req.user);
+  // extracting user data via the access token using auth validation
   const { ...userData } = req.body;
   const result = await AuthServices.loginUser(userData);
+
+  // destructuring accessToken from the result
   const { accessToken } = result;
 
   sendResponse(res, {

@@ -20,17 +20,16 @@ const createUserIntoDB = async (password: string, payload: TUser) => {
 };
 
 const loginUser = async (payload: Partial<TUser>) => {
+  // accessing user from the User model by their email address
   const user = await User.findOne({ email: payload?.email }).select(
     '+password',
   );
-  // console.log(user);
 
+  // checking the password is same or not
   const isPasswordSame = await bcrypt.compare(
     payload?.password as string,
     user?.password as string,
   );
-  // console.log(payload?.password, user?.password);
-  // console.log(isPasswordSame);
 
   // checking if the user exists
   if (!user || !isPasswordSame) {
@@ -43,6 +42,7 @@ const loginUser = async (payload: Partial<TUser>) => {
     throw new AppError(httpStatus.FORBIDDEN, 'This user is blocked');
   }
 
+  // the data we are going to pass inside the token
   const jwtPayload: {
     userEmail: string;
     userRole: TUserRole;
@@ -51,6 +51,7 @@ const loginUser = async (payload: Partial<TUser>) => {
     userRole: user?.role,
   };
 
+  // access token to identify the user with their role
   const accessToken = createToken(
     jwtPayload,
     config.jwt_access_secret as string,
