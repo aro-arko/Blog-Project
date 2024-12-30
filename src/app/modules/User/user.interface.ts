@@ -1,7 +1,11 @@
+export type TUserRole = {
+  role: 'admin' | 'user';
+};
+
 export type TUser = {
   name: string;
   email: string;
   password: string;
-  role: 'admin' | 'user';
+  role: TUserRole;
   isBlocked: boolean;
 };
