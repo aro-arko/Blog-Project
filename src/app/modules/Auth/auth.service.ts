@@ -20,7 +20,9 @@ const createUserIntoDB = async (password: string, payload: TUser) => {
 };
 
 const loginUser = async (payload: Partial<TUser>) => {
-  const user = await User.findOne({ email: payload?.email });
+  const user = await User.findOne({ email: payload?.email }).select(
+    '+password',
+  );
   // console.log(user);
 
   const isPasswordSame = await bcrypt.compare(

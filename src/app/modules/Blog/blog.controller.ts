@@ -4,14 +4,20 @@ import { BlogServices } from './blog.service';
 import httpStatus from 'http-status';
 
 const createBlog = catchAsync(async (req, res) => {
-  console.log(req.user);
-  const result = await BlogServices.createBlogIntoDB(req.body);
+  const userData = req.user;
+  const result = await BlogServices.createBlogIntoDB(userData, req.body);
 
+  const { _id, title, content, author } = result;
   sendResponse(res, {
-    statusCode: httpStatus.OK,
+    statusCode: httpStatus.CREATED,
     success: true,
     message: 'Blog created successfully',
-    data: result,
+    data: {
+      _id,
+      title,
+      content,
+      author,
+    },
   });
 });
 
