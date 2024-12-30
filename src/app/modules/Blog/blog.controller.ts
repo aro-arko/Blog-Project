@@ -24,9 +24,10 @@ const createBlog = catchAsync(async (req, res) => {
 });
 
 const updateBlog = catchAsync(async (req, res) => {
+  //accessing user from token
   const userData = req.user;
   const { id } = req.params;
-  // console.log(userData, req.params);
+
   const result = await BlogServices.updateBlogIntoDB(userData, id, req.body);
 
   // destructuring required objects
@@ -45,7 +46,40 @@ const updateBlog = catchAsync(async (req, res) => {
   });
 });
 
+const deleteBlog = catchAsync(async (req, res) => {
+  const userData = req.user;
+  const { id } = req.params;
+
+  await BlogServices.deleteBlogFromDB(userData, id);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Blog deleted successfully',
+  });
+});
+
+const getAllBlogs = catchAsync(async (req, res) => {
+  const result = await BlogServices.getAllBlogsFromDB(req.query);
+
+  const eachResult = result.map((blog) => ({
+    _id: blog._id,
+    title: blog.title,
+    content: blog.content,
+    author: blog.author, // Assuming `author` already contains details
+  }));
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Blogs fetched successfully',
+    data: eachResult,
+  });
+});
+
 export const BlogController = {
   createBlog,
   updateBlog,
+  deleteBlog,
+  getAllBlogs,
 };

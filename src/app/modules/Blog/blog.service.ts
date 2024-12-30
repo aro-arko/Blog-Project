@@ -4,6 +4,8 @@ import User from '../User/user.model';
 import { TBlog } from './blog.interface';
 import Blog from './blog.model';
 import httpStatus from 'http-status';
+import QueryBuilder from '../../builder/QueryBuilder';
+import { blogSearchAbleFields } from './blog.constant';
 
 const createBlogIntoDB = async (author: JwtPayload, payLoad: TBlog) => {
   const user = await User.findOne({ email: author?.userEmail });
@@ -49,7 +51,50 @@ const updateBlogIntoDB = async (
   return updatedBlog;
 };
 
+const deleteBlogFromDB = async (accessUserData: JwtPayload, id: string) => {
+  // finding the blog using it's _id
+  const blogDetails = await Blog.findById(id);
+
+  // blog author details
+  const blogDetailsUserId = blogDetails?.author;
+  const blogDetailsUserDetails = await User.findById(blogDetailsUserId);
+  const blogDetailsUserEmail = blogDetailsUserDetails?.email;
+
+  // current user
+  const accessingUserEmail = accessUserData?.userEmail;
+  const accessingUserRole = accessUserData?.userRole;
+
+  if (
+    accessingUserRole !== 'admin' &&
+    blogDetailsUserEmail !== accessingUserEmail
+  ) {
+    throw new AppError(
+      httpStatus.UNAUTHORIZED,
+      'Sorry! You are not allowed to delete this blog',
+    );
+  }
+
+  const deletedBlog = await Blog.findByIdAndDelete(id);
+  return deletedBlog;
+};
+
+const getAllBlogsFromDB = async (query: Record<string, unknown>) => {
+  const blogsQuery = new QueryBuilder(Blog.find().populate('author'), query)
+    .search(blogSearchAbleFields)
+    .filter()
+    .sort()
+    .paginate()
+    .fields();
+
+  const result = await blogsQuery.modelQuery;
+  return result;
+};
+
+export default getAllBlogsFromDB;
+
 export const BlogServices = {
   createBlogIntoDB,
   updateBlogIntoDB,
+  deleteBlogFromDB,
+  getAllBlogsFromDB,
 };
