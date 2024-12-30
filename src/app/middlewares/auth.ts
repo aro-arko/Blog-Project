@@ -1,5 +1,3 @@
-/* eslint-disable no-unused-vars */
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import config from '../config';
 import AppError from '../errors/AppErrror';
 import { TUserRole } from '../modules/User/user.interface';
