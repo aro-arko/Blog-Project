@@ -23,7 +23,7 @@ router.patch(
 );
 
 // delete a blog
-router.delete('/:id', auth('admin', 'user'), BlogController.deleteBlog);
+router.delete('/:id', auth('user'), BlogController.deleteBlog);
 
 // get all blogs
 router.get('/', BlogController.getAllBlogs);

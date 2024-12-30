@@ -62,12 +62,8 @@ const deleteBlogFromDB = async (accessUserData: JwtPayload, id: string) => {
 
   // current user
   const accessingUserEmail = accessUserData?.userEmail;
-  const accessingUserRole = accessUserData?.userRole;
 
-  if (
-    accessingUserRole !== 'admin' &&
-    blogDetailsUserEmail !== accessingUserEmail
-  ) {
+  if (blogDetailsUserEmail !== accessingUserEmail) {
     throw new AppError(
       httpStatus.UNAUTHORIZED,
       'Sorry! You are not allowed to delete this blog',
