@@ -1,6 +1,6 @@
 import config from '../../config';
 import AppError from '../../errors/AppErrror';
-import { TUser } from '../User/user.interface';
+import { TUser, TUserRole } from '../User/user.interface';
 import User from '../User/user.model';
 import httpStatus from 'http-status';
 import bcrypt from 'bcrypt';
@@ -41,7 +41,10 @@ const loginUser = async (payload: Partial<TUser>) => {
     throw new AppError(httpStatus.FORBIDDEN, 'This user is blocked');
   }
 
-  const jwtPayload = {
+  const jwtPayload: {
+    userEmail: string;
+    userRole: TUserRole;
+  } = {
     userEmail: user?.email,
     userRole: user?.role,
   };
