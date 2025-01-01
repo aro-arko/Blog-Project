@@ -66,7 +66,7 @@ const getAllBlogs = catchAsync(async (req, res) => {
     _id: blog._id,
     title: blog.title,
     content: blog.content,
-    author: blog.author, // Assuming `author` already contains details
+    author: blog.author,
   }));
 
   sendResponse(res, {

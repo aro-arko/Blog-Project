@@ -5,6 +5,10 @@ import AppError from '../errors/AppErrror';
 import config from '../config';
 import handleValidationError from '../errors/handleValidationError';
 import handleDuplicateError from '../errors/handleDuplicateError';
+import { ZodError } from 'zod';
+import handleZodError from '../errors/handleZodError';
+import authenticationError from '../errors/handleAuthenticationError';
+import handleCastError from '../errors/handleCastError';
 
 // Global error handler middleware
 const globalErrorHandler: ErrorRequestHandler = (error, req, res, next) => {
@@ -12,7 +16,10 @@ const globalErrorHandler: ErrorRequestHandler = (error, req, res, next) => {
   let message = 'Something went wrong';
 
   // Handle validation errors (e.g., mongoose validation)
-  if (error?.name === 'ValidationError') {
+  if (error instanceof ZodError) {
+    const simplifiedError = handleZodError(error);
+    message = simplifiedError?.message;
+  } else if (error?.name === 'ValidationError') {
     const simplifiedError = handleValidationError(error);
     statusCode = simplifiedError?.statusCode;
     message = simplifiedError?.message;
@@ -20,6 +27,21 @@ const globalErrorHandler: ErrorRequestHandler = (error, req, res, next) => {
   // Handle duplicate key errors (e.g., MongoDB unique constraints)
   else if (error?.code === 11000) {
     const simplifiedError = handleDuplicateError(error);
+    statusCode = simplifiedError?.statusCode;
+    message = simplifiedError?.message;
+  }
+  // handle token expiry error
+  else if (
+    error.name === 'TokenExpiredError' ||
+    error.name === 'JsonWebTokenError'
+  ) {
+    const simplifiedError = authenticationError(error);
+    statusCode = simplifiedError?.statusCode;
+    message = simplifiedError.message;
+  }
+  // handle cast error
+  else if (error?.name === 'CastError') {
+    const simplifiedError = handleCastError(error);
     statusCode = simplifiedError?.statusCode;
     message = simplifiedError?.message;
   }

@@ -7,6 +7,12 @@ import bcrypt from 'bcrypt';
 import { createToken } from './auth.utils';
 
 const createUserIntoDB = async (password: string, payload: TUser) => {
+  // checking is user exists
+  const isUserExists = await User.findOne({ email: payload.email });
+  if (isUserExists) {
+    throw new Error('User with this email already exists');
+  }
+
   // Create a user object and set the password
   const userData: Partial<TUser> = {
     ...payload,
@@ -20,38 +26,45 @@ const createUserIntoDB = async (password: string, payload: TUser) => {
 };
 
 const loginUser = async (payload: Partial<TUser>) => {
-  // accessing user from the User model by their email address
-  const user = await User.findOne({ email: payload?.email }).select(
-    '+password',
-  );
+  // Ensure email and password are provided
+  if (!payload?.email || !payload?.password) {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      'Email and password are required',
+    );
+  }
 
-  // checking the password is same or not
-  const isPasswordSame = await bcrypt.compare(
-    payload?.password as string,
-    user?.password as string,
-  );
+  // Find user by email and include the password
+  const user = await User.findOne({ email: payload.email }).select('+password');
 
-  // checking if the user exists
-  if (!user || !isPasswordSame) {
+  // If user doesn't exist
+  if (!user) {
     throw new AppError(httpStatus.UNAUTHORIZED, 'Invalid credentials');
   }
 
-  // checking if the user is blocked or not
-  const isBlocked = user?.isBlocked;
-  if (isBlocked) {
+  // Compare the provided password with the stored hashed password
+  const isPasswordSame = await bcrypt.compare(payload.password, user.password);
+
+  // If passwords don't match
+  if (!isPasswordSame) {
+    throw new AppError(httpStatus.UNAUTHORIZED, 'Invalid credentials');
+  }
+
+  // Check if the user is blocked
+  if (user.isBlocked) {
     throw new AppError(httpStatus.FORBIDDEN, 'This user is blocked');
   }
 
-  // the data we are going to pass inside the token
+  // Payload for JWT token
   const jwtPayload: {
     userEmail: string;
     userRole: TUserRole;
   } = {
-    userEmail: user?.email,
-    userRole: user?.role,
+    userEmail: user.email,
+    userRole: user.role,
   };
 
-  // access token to identify the user with their role
+  // Create access token
   const accessToken = createToken(
     jwtPayload,
     config.jwt_access_secret as string,
