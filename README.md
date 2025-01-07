@@ -52,7 +52,7 @@ Before you begin, ensure you have the following installed:
 
 1. Clone this repository:
    ```bash
-   https://github.com/aro-arko/Blog-Project.git
+   git clone https://github.com/aro-arko/Blog-Project.git
    ```
 2. Install Dependencies:
    ```bash
