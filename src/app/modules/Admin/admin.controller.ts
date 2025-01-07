@@ -5,9 +5,8 @@ import { AdminServices } from './admin.service';
 
 const blockUser = catchAsync(async (req, res) => {
   const { userId } = req.params;
-  const cleanedUserId = userId.startsWith(':') ? userId.slice(1) : userId;
 
-  await AdminServices.blockUserIntoDB(cleanedUserId);
+  await AdminServices.blockUserIntoDB(userId);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,

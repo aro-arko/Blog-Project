@@ -19,8 +19,7 @@ const http_status_1 = __importDefault(require("http-status"));
 const admin_service_1 = require("./admin.service");
 const blockUser = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { userId } = req.params;
-    const cleanedUserId = userId.startsWith(':') ? userId.slice(1) : userId;
-    yield admin_service_1.AdminServices.blockUserIntoDB(cleanedUserId);
+    yield admin_service_1.AdminServices.blockUserIntoDB(userId);
     (0, sendResponse_1.default)(res, {
         statusCode: http_status_1.default.OK,
         success: true,
