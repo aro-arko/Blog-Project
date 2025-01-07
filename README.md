@@ -151,7 +151,7 @@ Registers a new user.
 
 #### 1.2 Login User
 
-**POST** `/api/auth/register`
+**POST** `/api/auth/login`
 
 Authenticates a user and generates a JWT token.
 
