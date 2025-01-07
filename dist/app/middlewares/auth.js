@@ -12,6 +12,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+/* eslint-disable no-unused-vars */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 const config_1 = __importDefault(require("../config"));
 const AppErrror_1 = __importDefault(require("../errors/AppErrror"));
 const catchAsync_1 = __importDefault(require("../utils/catchAsync"));
@@ -22,29 +24,36 @@ const user_model_1 = __importDefault(require("../modules/User/user.model"));
 const auth = (...requiredRoles) => {
     return (0, catchAsync_1.default)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
         // Retrieve token from headers
-        const token = req.headers.authorization;
-        if (!token) {
+        const authHeader = req.headers.authorization;
+        if (!authHeader || !authHeader.startsWith('Bearer ')) {
             throw new AppErrror_1.default(http_status_1.default.UNAUTHORIZED, 'You are not authorized!');
         }
-        // Verify the token and decode it
-        const decoded = jsonwebtoken_1.default.verify(token, config_1.default.jwt_access_secret);
-        const { userEmail, userRole } = decoded;
-        // Check if user exists
-        const user = yield user_model_1.default.findOne({ email: userEmail });
-        if (!user) {
-            throw new AppErrror_1.default(http_status_1.default.NOT_FOUND, 'This user is not found!');
+        // Extract the token after 'Bearer '
+        const token = authHeader.split(' ')[1];
+        try {
+            // Verify the token and decode it
+            const decoded = jsonwebtoken_1.default.verify(token, config_1.default.jwt_access_secret);
+            const { userEmail, userRole } = decoded;
+            // Check if user exists
+            const user = yield user_model_1.default.findOne({ email: userEmail });
+            if (!user) {
+                throw new AppErrror_1.default(http_status_1.default.NOT_FOUND, 'This user is not found!');
+            }
+            // Check if user is blocked
+            if (user.isBlocked) {
+                throw new AppErrror_1.default(http_status_1.default.FORBIDDEN, 'This user is blocked');
+            }
+            // Check if the user's role is authorized
+            if (requiredRoles.length && !requiredRoles.includes(userRole)) {
+                throw new AppErrror_1.default(http_status_1.default.UNAUTHORIZED, 'You are not authorized!');
+            }
+            // Attach user information to the request object
+            req.user = decoded;
+            next();
         }
-        // Check if user is blocked
-        if (user.isBlocked) {
-            throw new AppErrror_1.default(http_status_1.default.FORBIDDEN, 'This user is blocked');
+        catch (error) {
+            throw new AppErrror_1.default(http_status_1.default.UNAUTHORIZED, 'Invalid or expired token!');
         }
-        // Check if the user's role is authorized
-        if (requiredRoles && !requiredRoles.includes(userRole)) {
-            throw new AppErrror_1.default(http_status_1.default.UNAUTHORIZED, 'You are not authorized!');
-        }
-        // Attach user information to the request object
-        req.user = decoded;
-        next();
     }));
 };
 exports.default = auth;
