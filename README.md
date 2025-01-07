@@ -295,7 +295,7 @@ Authorization: Bearer <token>
 }
 ```
 
-#### 2.3 Delete Blog
+#### 2.4 Get All Blogs (Public)
 
 **GET** `/api/blogs`
 
