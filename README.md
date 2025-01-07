@@ -16,10 +16,9 @@ The Blog Project API is a system development project created for a blogging plat
 
 ### User
 
-- Created manually in the database with predefined credentials.
-- Can delete any blog.
-- Can block any user by updating a property isBlocked.
-- Cannot update any blog.
+- Can create a new blog.
+- Can delete their own blog.
+- Cannot update thwir own blog.
 
 ## Authentication & Authorization
 
